@@ -19,7 +19,7 @@ min_learning_rate = 6e-5
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f"using {device} as device")
 evaluation_iterations = 5000
-evaluation_interval = 300   #controls the frequency of evaluation and checkpoint saves
+evaluation_interval = 200   #controls the frequency of evaluation and checkpoint saves
 n_layer =10
 n_head =8
 n_embd =512
@@ -88,6 +88,7 @@ elif init_from == 'resume':
     model.load_state_dict(state_dict)
     iter_num = checkpoint['iter_num']
     best_val_loss = checkpoint['best_val_loss']
+    print(f"Resumed training from checkpoint. Total iterations: {iter_num}, Best validation loss: {best_val_loss:.4f}")
 model.to(device)
 scaler = torch.amp.GradScaler('cuda',enabled=(dtype == 'float16')) #amp scaler for mixed percision training
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(beta1, beta2), weight_decay=weight_decay)
@@ -128,12 +129,12 @@ while True:
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
-    # evaluate the loss on train/val sets and write checkpoints
-    if iter_num % evaluation_interval == 0:
-        if local_iter_num == 0:   #to skip the evaluation process in the begining when resuming from checkpoint
-            print(f"step {iter_num}: val loss {best_val_loss:.4f}, from previous checkpoint")
-            continue
-        else:
+    # Skip evaluation on the first local iteration after resuming
+    if local_iter_num == 0 and init_from == 'resume':
+        print(f"Skipping first evaluation after resuming from checkpoint.")
+    else:
+        # evaluate the loss on train/val sets and write checkpoints
+        if iter_num % evaluation_interval == 0:
             print("Beginning model evaluation!")
             t2 = time.time()
             losses = estimate_loss()
@@ -152,10 +153,10 @@ while True:
                     print(f"saving checkpoint to {out_dir}")
                     torch.save(checkpoint, os.path.join(out_dir, 'ckpt.pt'))
             t3 = time.time()
-            print(f"time taken to evaluate and save the model{(t3-t2)/60.0:.2f} min")
+            print(f"time taken to evaluate and save the model: {(t3 - t2) / 60.0:.2f} min")
     if iter_num == 0 and eval_only:
         break
-    t0=time.time()
+    t0 = time.time()
     # forward backward update, with optional gradient accumulation to simulate larger batch size
     # and using the GradScaler if data type is float16
     for micro_step in range(gradient_accumulation_steps):
