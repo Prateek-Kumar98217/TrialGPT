@@ -52,6 +52,9 @@ if __name__ == "__main__":
         else:
             x, y = x.to(device), y.to(device)
         return x, y
+    iter_num = 0
+    local_iter_num = 0
+    best_val_loss = 1e9
 
     # Model initialization (same as before)
     model_args = dict(n_layer=n_layer, n_head=n_head, n_embd=n_embd, block_size=block_size, dropout=dropout, vocab_size=vocab_size)
@@ -70,6 +73,8 @@ if __name__ == "__main__":
         model = GPT(config)
         state_dict = checkpoint['model']
         model.load_state_dict(state_dict)
+        iter_num = checkpoint['iter_num']
+        best_val_loss = checkpoint['best_val_loss']
 
     # Apply gradient checkpointing (same as before)
     model.gradient_checkpointing = True
@@ -112,15 +117,11 @@ if __name__ == "__main__":
     )
 
     # Main training loop with tqdm for training progress
-iter_num = 0
-local_iter_num = 0
-best_val_loss = 1e9
-
 while iter_num < max_iterations:
     # Evaluation
     if iter_num % evaluation_interval == 0:
         if local_iter_num == 0:
-            print(f"From checkpoint, step: {iter_num} validation loss:{best_val_loss}")
+            print(f"From checkpoint, step: {iter_num} validation loss:{best_val_loss:.4f}")
         else:
             print("Beginning model evaluation!")
             t2 = time.time()
