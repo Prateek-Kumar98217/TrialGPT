@@ -8,9 +8,9 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 out_dir = 'output'  # Output directory where the model checkpoints are saved
 checkpoint_path = os.path.join(out_dir, 'ckpt.pt')  # Path to the saved checkpoint
 vocab_size = 50304  # The vocabulary size of the model (same as in the training script)
-block_size = 512  # The block size (same as in the training script)
+block_size = 256  # The block size (same as in the training script)
 temperature = 1.0  # Controls the randomness of predictions (higher value = more random)
-top_k = 5  # Number of top-k tokens to sample from
+top_k = 10 # Number of top-k tokens to sample from
 max_new_tokens = 300  # Number of tokens to generate in the inference process
 
 # Initialize the tokenizer (use GPT-2 tokenizer since it's similar to your model's)
@@ -37,7 +37,7 @@ def encode_input_text(input_text, tokenizer, block_size):
     return input_ids
 
 # Example input text to prompt the model
-input_text = "There was an man, in the heavens long ago..."
+input_text = "Once upon a time, long ago ..."
 
 # Encode the input text
 input_ids = encode_input_text(input_text, tokenizer, block_size)
