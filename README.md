@@ -71,7 +71,7 @@ python preprocess.py
 - Python 3.8+
 
 ## License
-This project is licensed under the MIT License.
+This project is unlicensed.
 
 ## Acknowledgements
 - The GPT model architecture is inspired by OpenAI's GPT-2.
