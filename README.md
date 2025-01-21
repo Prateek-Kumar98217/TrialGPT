@@ -1,3 +1,4 @@
+@ -0,0 +1,78 @@
 # TrailGPT
 
 TrailGPT is a project that involves training, evaluating, and using a GPT model for text generation. This repository contains scripts for training the model, preprocessing the dataset, and performing inference.
@@ -71,7 +72,7 @@ python preprocess.py
 - Python 3.8+
 
 ## License
-This project is unlicensed.
+This project is licensed under the MIT License.
 
 ## Acknowledgements
 - The GPT model architecture is inspired by OpenAI's GPT-2.
