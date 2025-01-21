@@ -38,7 +38,7 @@ This script is used for preprocessing the dataset. It includes:
 ## Usage
 
 ### Virtual Environment
-Before running any scripts, create a virtual environment:
+creating and activating a virtual environment is recommended before running any scripts:
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows use `venv\Scripts\activate`
@@ -50,22 +50,22 @@ Install the required packages using:
 pip install -r requirements.txt
 ```
 
-### Training
+### Data Preprocessing
+To preprocess the dataset, run:
+```bash
+python preprocess.py
+```
+
+### Model Training
 To train the model, run:
 ```bash
 python train.py
 ```
 
-### Inference
+### Model Inference
 To generate text using the trained model, run:
 ```bash
 python infer.py
-```
-
-### Preprocessing
-To preprocess the dataset, run:
-```bash
-python preprocess.py
 ```
 
 ## Requirements
