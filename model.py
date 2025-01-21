@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch
 import math
 import torch.nn.functional as F
-
+#A multilayer perceptron class for computaion and transformation in hidden layers at different stages of the model
 class MultiLayerPerceptron(nn.Module):
     def __init__(self, config):
         super().__init__()
@@ -14,11 +14,12 @@ class MultiLayerPerceptron(nn.Module):
 
     def forward(self, x):
         x = self.c_fc(x)
-        x = self.gelu(x)
+        x = self.gelu(x) # can try some other activation like relu, if you want to experiment
         x = self.c_proj(x)
         x = self.dropout(x)
         return x
-
+# class responsible for the magic of a transformer, since te model is decoder only the attention implemented is self attention
+# if you have access to triton library, add flash attention layer for faster attention computation
 class CausalSelfAttention(nn.Module):
     def __init__(self, config):
         super().__init__()
@@ -26,17 +27,17 @@ class CausalSelfAttention(nn.Module):
         self.n_head = config.n_head
         self.n_embd = config.n_embd
         self.dropout = config.dropout
-
+        # can avoid the bias parameter entirely, only there if there will be any future implementation
         self.c_attn = nn.Linear(config.n_embd, 3 * config.n_embd, bias=False)
         self.c_proj = nn.Linear(config.n_embd, config.n_embd, bias=False)
         self.attn_dropout = nn.Dropout(config.dropout)
         self.resid_dropout = nn.Dropout(config.dropout)
 
-        # Register a static mask for efficiency
+        # Register a static mask for efficiency and also because dont have access to flash attention
         self.register_buffer("mask", torch.tril(torch.ones(config.block_size, config.block_size)))
 
     def forward(self, x):
-        B, T, C = x.size()
+        B, T, C = x.size() #B: batch size, T: context size or sequence length, C: embeding size or number of channels
 
         query, key, value = self.c_attn(x).split(self.n_embd, dim=2)
         query = query.view(B, T, self.n_head, C // self.n_head).transpose(1, 2)
@@ -44,7 +45,7 @@ class CausalSelfAttention(nn.Module):
         value = value.view(B, T, self.n_head, C // self.n_head).transpose(1, 2)
 
         attn = (query @ key.transpose(-2, -1)) * (1.0 / math.sqrt(key.size(-1)))
-        attn = attn.masked_fill(self.mask[:T, :T] == 0, float('-inf'))
+        attn = attn.masked_fill(self.mask[:T, :T] == 0, float('-inf')) # attention masking
         attn = F.softmax(attn, dim=-1)
         attn = self.attn_dropout(attn)
 
@@ -53,7 +54,7 @@ class CausalSelfAttention(nn.Module):
         y = self.c_proj(y)
         y = self.resid_dropout(y)
         return y
-
+# class to represent  a single decoder block
 class Block(nn.Module):
     def __init__(self, config):
         super().__init__()
@@ -63,19 +64,19 @@ class Block(nn.Module):
         self.perceptron = MultiLayerPerceptron(config)
 
     def forward(self, x):
-        x = x + self.attn(self.ln_1(x))
+        x = x + self.attn(self.ln_1(x)) # applying attention
         x = x + self.perceptron(self.ln_2(x))
         return x
-
+# a dataclass to store and pass all the configuration for the model, also to set some default values in case some configuration are missing while training
 @dataclass
 class GPTConfig:
-    n_layer: int = 12
-    n_head: int = 12
-    n_embd: int = 768
-    block_size: int = 1024
+    n_layer: int = 12 # number of layers
+    n_head: int = 12 #number of attention heads
+    n_embd: int = 768 # embeding suze
+    block_size: int = 1024 # context size
     vocab_size: int = 50304  # round of 50257 to a multiple of 64
-    dropout: float = 0.05
-
+    dropout: float = 0.05 # dropout pecentage/fraction
+#main GPT Model class, contains all the nessecary funtionality for forward and backword passes and generation
 class GPT(nn.Module):
     def __init__(self, config: GPTConfig):
         super().__init__()
