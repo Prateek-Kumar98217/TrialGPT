@@ -4,10 +4,10 @@ import numpy as np
 import torch
 from model import GPTConfig, GPT
 from torch.optim.lr_scheduler import OneCycleLR  # can experiment with other lr schedulers, I find this better for smoother training
-from tqdm import tqdm  # Import tqdm for progress bars
+from tqdm import tqdm  # tqdm for progress bars
 
 if __name__ == "__main__":
-    # Variables and flags declaration (same as before)
+    # Variables and flags declaration
     gradient_accumulation_steps = 4 * 8  # This value simulates larger batches, reduce this to decrease number of forward passes before a single backward pass. Also keep this value as a multiplication of two numbers and change only the first number for easier tuning of this training parameter.
     learning_rate = 6e-4
     dataset = 'openwebtext'
@@ -26,7 +26,6 @@ if __name__ == "__main__":
     block_size = 256
     batch_size = 18
     dropout = 0.1
-    lr_decay_iters = 50000  # Highly recommend to have this value same as max iterations.
     dtype = 'float16'
     out_dir = 'output'
     eval_only = False
