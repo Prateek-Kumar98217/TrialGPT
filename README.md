@@ -1,4 +1,4 @@
-
+# TrialGPT
 
 **TrialGPT** is a custom GPT-2-based language model designed for text generation tasks. This project involves training the model from scratch, evaluating its performance, and performing inference to generate coherent text. TrialGPT is developed to explore the workings of **Large Language Models (LLMs)** and is based on the **OpenWebText** and **Dolma v16-sample** datasets.
 
