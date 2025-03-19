@@ -1,4 +1,3 @@
-@ -0,0 +1,78 @@
 # TrailGPT
 
 TrailGPT is a project that involves training, evaluating, and using a GPT model for text generation. This repository contains scripts for training the model, preprocessing the dataset, and performing inference.
